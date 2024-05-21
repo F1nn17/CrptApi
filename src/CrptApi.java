@@ -66,7 +66,8 @@ public class CrptApi implements PublicApi {
         this.requestLimit = requestLimit;
         semaphore = new Semaphore(requestLimit, true);
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(new CounterReset(), 60000, 1, timeUnit);
+        long delay = timeUnit.convert(1, timeUnit);
+        scheduler.scheduleAtFixedRate(new CounterReset(), delay, 1, timeUnit);
     }
 
     @Override
