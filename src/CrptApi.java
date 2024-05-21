@@ -3,6 +3,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -15,7 +17,7 @@ class Launcher{
     public static void main(String[] args) {
         CrptApi crptApi = new CrptApi(TimeUnit.MINUTES, 5);
         pool = Executors.newFixedThreadPool(50);
-        Document document = new Document.DocumentBuilder().build();
+        Document document = Document.builder().docId("string").build();
         String signature = "";
         for (int i = 0; i < 15; i++) {
             pool.execute(() -> crptApi.register(document, signature));
@@ -47,6 +49,7 @@ class PublicApiImp implements PublicApi{
                     .build();
             var client = HttpClient.newHttpClient();
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(resultJson);
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -86,7 +89,7 @@ public class CrptApi implements PublicApi {
     }
 }
 
-@Builder
+@SuperBuilder
 @Data
 class Document{
     @JsonProperty("description")
@@ -134,6 +137,7 @@ class Document{
 
 }
 
+@SuperBuilder
 @Data
 class Products{
     @JsonProperty("certificate_document")
@@ -168,6 +172,7 @@ class Products{
     }
 }
 
+@SuperBuilder
 @Data
 class Description{
     @JsonProperty("participantInn")
