@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Builder;
 import lombok.Data;
 import java.io.IOException;
 import java.net.URI;
@@ -55,13 +56,14 @@ class PublicApiImp implements PublicApi{
 public class CrptApi implements PublicApi {
     private final PublicApiImp publicApiImp;
     private final int requestLimit;
-    private Semaphore semaphore;
+    private final Semaphore semaphore;
 
     CrptApi(TimeUnit timeUnit, int requestLimit){
         publicApiImp = new PublicApiImp();
         this.requestLimit = requestLimit;
+        semaphore = new Semaphore(requestLimit, true);
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(new CounterReset(), 0, 1, timeUnit);
+        scheduler.scheduleAtFixedRate(new CounterReset(), 60000, 1, timeUnit);
     }
 
     @Override
@@ -79,12 +81,12 @@ public class CrptApi implements PublicApi {
      class CounterReset implements Runnable {
         @Override
         public void run() {
-            if(semaphore != null)   semaphore.release(requestLimit);
-            if(semaphore == null)   semaphore = new Semaphore(requestLimit, true);
+            semaphore.release(requestLimit);
         }
     }
 }
 
+@Builder
 @Data
 class Document{
     @JsonProperty("description")
@@ -127,112 +129,6 @@ class Document{
     private String regNumber;
 
     Document(){
-
-    }
-
-    Document(DocumentBuilder documentBuilder){
-         this.description = documentBuilder.description;
-         this.docId = documentBuilder.docId;
-         this.docStatus = documentBuilder.docStatus;
-         this.docType = documentBuilder.docType;
-         this.importRequest = documentBuilder.importRequest;
-         this.ownerInn = documentBuilder.ownerInn;
-         this.participantInn = documentBuilder.participantInn;
-         this.producerInn = documentBuilder.producerInn;
-         this.productionDate = documentBuilder.productionDate;
-         this.productionType = documentBuilder.productionType;
-         this.products = documentBuilder.products;
-         this.regDate = documentBuilder.regDate;
-         this.regNumber = documentBuilder.regNumber;
-    }
-
-    public static class DocumentBuilder{
-        private Description description;
-        private String docId;
-        private String docStatus;
-        private String docType;
-        private boolean importRequest;
-        private String ownerInn;
-        private String participantInn;
-        private String producerInn;
-        private String productionDate;
-        private String productionType;
-        private Products[] products;
-        private String regDate;
-        private String regNumber;
-
-        public DocumentBuilder(){
-            super();
-        }
-
-        public DocumentBuilder description(Description description){
-            this.description = description;
-            return this;
-        }
-
-        public DocumentBuilder docId(String docId){
-            this.docId = docId;
-            return this;
-        }
-
-        public DocumentBuilder docStatus(String docStatus){
-            this.docStatus = docStatus;
-            return this;
-        }
-
-        public DocumentBuilder docType(String docType){
-            this.docType = docType;
-            return this;
-        }
-
-        public DocumentBuilder importRequest(boolean importRequest){
-            this.importRequest = importRequest;
-            return this;
-        }
-
-        public DocumentBuilder ownerInn(String ownerInn){
-            this.ownerInn = ownerInn;
-            return this;
-        }
-
-        public DocumentBuilder participantInn(String participantInn){
-            this.participantInn = participantInn;
-            return this;
-        }
-
-        public DocumentBuilder producerInn(String producerInn){
-            this.producerInn = producerInn;
-            return this;
-        }
-
-        public DocumentBuilder productionDate(String productionDate){
-            this.productionDate = productionDate;
-            return this;
-        }
-
-        public DocumentBuilder productionType(String productionType){
-            this.productionType = productionType;
-            return this;
-        }
-
-        public DocumentBuilder products(Products[] products){
-            this.products = products;
-            return this;
-        }
-
-        public DocumentBuilder regDate(String regDate){
-            this.regDate = regDate;
-            return this;
-        }
-
-        public DocumentBuilder regNumber(String regNumber){
-            this.regNumber = regNumber;
-            return this;
-        }
-
-        public Document build(){
-            return new Document(this);
-        }
 
     }
 
